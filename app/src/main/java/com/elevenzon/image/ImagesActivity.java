@@ -236,7 +236,7 @@ public class ImagesActivity extends Activity {
         if (!selectedImageList.contains(filePath)) {
             for (int pos = 0; pos < imageList.size(); pos++) {
                 if (imageList.get(pos).getImage() != null) {
-                    if (imageList.get(pos).getImage().equals(filePath)) {
+                    if (imageList.get(pos).getImage().equalsIgnoreCase(filePath)) {
                         imageList.remove(pos);
                     }
                 }
