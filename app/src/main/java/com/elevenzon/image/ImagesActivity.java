@@ -56,7 +56,7 @@ public class ImagesActivity extends Activity {
         }
     }
 
-    public void init(){
+    public void init() {
         imageRecyclerView = findViewById(R.id.recycler_view);
         selectedImageRecyclerView = findViewById(R.id.selected_recycler_view);
         done = findViewById(R.id.done);
@@ -73,9 +73,9 @@ public class ImagesActivity extends Activity {
         });
     }
 
-    public void setImageList(){
-        imageRecyclerView.setLayoutManager(new  GridLayoutManager(getApplicationContext(), 4));
-        imageAdapter = new  ImageAdapter(getApplicationContext(), imageList);
+    public void setImageList() {
+        imageRecyclerView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 4));
+        imageAdapter = new ImageAdapter(getApplicationContext(), imageList);
         imageRecyclerView.setAdapter(imageAdapter);
 
         imageAdapter.setOnItemClickListener(new ImageAdapter.OnItemClickListener() {
@@ -101,7 +101,7 @@ public class ImagesActivity extends Activity {
         setImagePickerList();
     }
 
-    public void setSelectedImageList(){
+    public void setSelectedImageList() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         selectedImageRecyclerView.setLayoutManager(layoutManager);
         selectedImageAdapter = new SelectedImageAdapter(this, selectedImageList);
@@ -109,7 +109,7 @@ public class ImagesActivity extends Activity {
     }
 
     // Add Camera and Folder in ArrayList
-    public void setImagePickerList(){
+    public void setImagePickerList() {
         for (int i = 0; i < resImg.length; i++) {
             ImageModel imageModel = new ImageModel();
             imageModel.setResImg(resImg[i]);
@@ -120,9 +120,9 @@ public class ImagesActivity extends Activity {
     }
 
     // get all images from external storage
-    public void getAllImages(){
+    public void getAllImages() {
         imageList.clear();
-        Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null,null, null);
+        Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
         while (cursor.moveToNext()) {
             String absolutePathOfImage = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA));
             ImageModel ImageModel = new ImageModel();
@@ -133,7 +133,7 @@ public class ImagesActivity extends Activity {
     }
 
     // start the image capture Intent
-    public void takePicture(){
+    public void takePicture() {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -145,7 +145,7 @@ public class ImagesActivity extends Activity {
         }
     }
 
-    public void getPickImageIntent(){
+    public void getPickImageIntent() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -217,39 +217,43 @@ public class ImagesActivity extends Activity {
 
     // Get image file path
     public void getImageFilePath(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, projection, null,    null, null);
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
         if (cursor != null) {
-            while  (cursor.moveToNext()) {
+            while (cursor.moveToNext()) {
                 String absolutePathOfImage = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA));
                 if (absolutePathOfImage != null) {
-                    // check selected image in imageList
-                    for (int pos = 0; pos < imageList.size(); pos++) {
-                        if (imageList.get(pos).getImage() != null) {
-                            if (imageList.get(pos).getImage().equals(absolutePathOfImage)) {
-                                imageList.remove(pos);
-                            }
-                        }
-                    }
-                    addImage(absolutePathOfImage);
+                    checkImage(absolutePathOfImage);
                 } else {
-                    addImage(String.valueOf(uri));
+                    checkImage(String.valueOf(uri));
                 }
             }
         }
     }
 
     // add image in selectedImageList and imageList
-    public void addImage(String filePath) {
+    public void checkImage(String filePath) {
         // Check before adding a new image to ArrayList to avoid duplicate images
         if (!selectedImageList.contains(filePath)) {
-            ImageModel imageModel = new ImageModel();
-            imageModel.setImage(filePath);
-            imageModel.setSelected(true);
-            imageList.add(2, imageModel);
-            selectedImageList.add(0, filePath);
-            selectedImageAdapter.notifyDataSetChanged();
-            imageAdapter.notifyDataSetChanged();
+            for (int pos = 0; pos < imageList.size(); pos++) {
+                if (imageList.get(pos).getImage() != null) {
+                    if (imageList.get(pos).getImage().equals(filePath)) {
+                        imageList.remove(pos);
+                    }
+                }
+            }
+            addImage(filePath);
         }
+    }
+
+    // add image in selectedImageList and imageList
+    public void addImage(String filePath) {
+        ImageModel imageModel = new ImageModel();
+        imageModel.setImage(filePath);
+        imageModel.setSelected(true);
+        imageList.add(2, imageModel);
+        selectedImageList.add(0, filePath);
+        selectedImageAdapter.notifyDataSetChanged();
+        imageAdapter.notifyDataSetChanged();
     }
 
     public boolean isStoragePermissionGranted() {
